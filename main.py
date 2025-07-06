@@ -8,6 +8,10 @@ from loguru import logger
 from app.config import settings
 from app.api.qr_routes import router as qr_router
 from app.middleware.rate_limiter import RateLimiterMiddleware
+from fastapi.templating import Jinja2Templates
+from fastapi import Request
+
+templates = Jinja2Templates(directory="templates")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -38,7 +42,11 @@ app.add_middleware(
 )
 
 # Add rate limiting middleware
-app.add_middleware(RateLimiterMiddleware)
+#rate_limiter = RateLimiterMiddleware(
+#    max_requests=settings.RATE_LIMIT_REQUESTS,
+#    window_seconds=settings.RATE_LIMIT_WINDOW
+#)
+#app.add_middleware(rate_limiter)
 
 # Include API routes
 app.include_router(qr_router, prefix="/api", tags=["QR Code Generation"])
@@ -69,6 +77,7 @@ async def homepage():
         </div>
         
         <h2>📖 Documentation</h2>
+        <p><a href="/demo" target="_blank">📋 Interactive Live Demo </a></p>
         <p><a href="/docs" target="_blank">📋 Interactive API Documentation (Swagger UI)</a></p>
         <p><a href="/redoc" target="_blank">📚 Alternative Documentation (ReDoc)</a></p>
         <p><a href="/openapi.json" target="_blank">🔧 OpenAPI JSON Schema</a></p>
@@ -88,7 +97,7 @@ async def homepage():
         </div>
         
         <h2>💡 Quick Test</h2>
-        <p>Try: <a href="/api/genqr?name=Test&id=test@paytm&amount=100" target="_blank">Generate Sample QR</a></p>
+        <p>Try: <a href="/api/genqr?name=Test&id=devagnmaniya611@okaxis&amount=100" target="_blank">Generate Sample QR</a></p>
     </body>
     </html>
     """
@@ -121,6 +130,11 @@ async def api_info():
             "styles": "/api/styles"
         }
     }
+
+@app.get("/demo", response_class=HTMLResponse)
+async def read_root(request: Request):
+    """Serve the main QR code generator page."""
+    return templates.TemplateResponse("index.html", {"request": request})
 
 # For Vercel deployment
 if __name__ == "__main__":
