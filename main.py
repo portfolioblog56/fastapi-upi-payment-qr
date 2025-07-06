@@ -7,7 +7,7 @@ from loguru import logger
 
 from app.config import settings
 from app.api.qr_routes import router as qr_router
-from app.middleware.rate_limiter import RateLimiter
+from app.middleware.rate_limiter import RateLimiterMiddleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -38,11 +38,7 @@ app.add_middleware(
 )
 
 # Add rate limiting middleware
-rate_limiter = RateLimiter(
-    max_requests=settings.RATE_LIMIT_REQUESTS,
-    window_seconds=settings.RATE_LIMIT_WINDOW
-)
-app.add_middleware(rate_limiter)
+app.add_middleware(RateLimiterMiddleware)
 
 # Include API routes
 app.include_router(qr_router, prefix="/api", tags=["QR Code Generation"])
