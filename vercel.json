@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "main.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "main.py"
+    }
+  ],
+  "env": {
+    "PYTHONPATH": ".",
+    "DEBUG": "False",
+    "HOST": "0.0.0.0",
+    "PORT": "8000"
+  },
+  "functions": {
+    "main.py": {
+      "maxDuration": 30
+    }
+  }
+}
