@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  fastapi-upi-qr:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=False
+      - LOG_LEVEL=INFO
+      - HOST=0.0.0.0
+      - PORT=8000
+      - SECRET_KEY=your-production-secret-key-change-this
+      - ALLOWED_ORIGINS=["http://localhost:3000", "https://yourdomain.com"]
+    volumes:
+      - ./static/uploads:/app/static/uploads
+      - ./static/generated:/app/static/generated
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - upi-qr-network
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - fastapi-upi-qr
+    restart: unless-stopped
+    networks:
+      - upi-qr-network
+
+networks:
+  upi-qr-network:
+    driver: bridge
